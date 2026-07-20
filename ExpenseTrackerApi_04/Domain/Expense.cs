@@ -7,6 +7,7 @@
         public decimal Amount { get; private set; }
         public DateTimeOffset ExpenseDate { get; private set; }
         public Guid CategoryId { get; private set; }
+        public Category? Category { get; private set; }
         private Expense()
         {
             Description = string.Empty;
