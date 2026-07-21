@@ -30,6 +30,8 @@ namespace ExpenseTrackerApi_04.Application
         }
         public async Task Delete(Guid id)
         {
+            var hasExpenses = await _context.Expenses.AnyAsync(e => e.CategoryId == id);
+            if (hasExpenses) throw new ConflictException("No se puede eliminar una categoria con gastos registrados.");
             var category = await _context.Categories.FindAsync(id);
             if (category == null) throw new NotFoundException("Categoria no encontrada");
             _context.Categories.Remove(category);
