@@ -1,4 +1,6 @@
-﻿namespace ExpenseTrackerApi_04.Domain
+﻿using ExpenseTrackerApi_04.Domain.Exceptions;
+
+namespace ExpenseTrackerApi_04.Domain
 {
     public class Category
     {
@@ -30,12 +32,12 @@
         {
             if (string.IsNullOrWhiteSpace(name))
             {
-                throw new ArgumentException("Name cannot be null or empty.", nameof(name));
+                throw new DomainException("Name cannot be null or empty.", nameof(name));
             }
 
             if (string.IsNullOrWhiteSpace(description))
             {
-                throw new ArgumentException("Description cannot be null or empty.", nameof(description));
+                throw new DomainException("Description cannot be null or empty.", nameof(description));
             }
         }
     }

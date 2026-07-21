@@ -1,4 +1,6 @@
-﻿namespace ExpenseTrackerApi_04.Domain
+﻿using ExpenseTrackerApi_04.Domain.Exceptions;
+
+namespace ExpenseTrackerApi_04.Domain
 {
     public class Expense
     {
@@ -36,21 +38,21 @@
         {
             if (string.IsNullOrWhiteSpace(description))
             {
-                throw new ArgumentException("Description cannot be null or empty.", nameof(description));
+                throw new DomainException("Description cannot be null or empty.", nameof(description));
             }
 
             if (amount <= 0)
             {
-                throw new ArgumentException("Amount must be a positive value.", nameof(amount));
+                throw new DomainException("Amount must be a positive value.", nameof(amount));
             }
 
             if (categoryId == Guid.Empty)
             {
-                throw new ArgumentException("CategoryId cannot be empty.", nameof(categoryId));
+                throw new DomainException("CategoryId cannot be empty.", nameof(categoryId));
             }
             if (expenseDate > DateTimeOffset.UtcNow)
             {
-                throw new ArgumentException("Expense date cannot be in the future.", nameof(expenseDate));
+                throw new DomainException("Expense date cannot be in the future.", nameof(expenseDate));
             }
         }
     }
