@@ -41,9 +41,62 @@ namespace ExpenseTrackerApi_04.Application
             if (expense == null) throw new NotFoundException("Gasto no encontrado");
             return MapToDto(expense);
         }
-        public async Task<IEnumerable<ExpenseDto>> GetAll()
+        public async Task<IEnumerable<ExpenseDto>> GetAll(ExpenseQueryParameters query)
         {
-            var expenses = await _context.Expenses.AsNoTracking().Include(e => e.Category).ToListAsync();
+            // 1. Crear la consulta base sin ejecutarla aún en la base de datos
+            var expensesQuery = _context.Expenses
+                .AsNoTracking()
+                .Include(e => e.Category)
+                .AsQueryable();
+
+            // 2. Filtro por Texto (Búsqueda)
+            if (!string.IsNullOrWhiteSpace(query.Search))
+            {
+                expensesQuery = expensesQuery.Where(e => e.Description.ToLower().Contains(query.Search.ToLower()));
+            }
+
+            // 3. Filtro por Categoría
+            if (query.CategoryId.HasValue)
+            {
+                expensesQuery = expensesQuery.Where(e => e.CategoryId == query.CategoryId.Value);
+            }
+
+            // 4. Filtro por Rango de Montos (minAmount y maxAmount / From y To)
+            var exactMin = query.minAmount ?? query.From;
+            if (exactMin.HasValue)
+            {
+                expensesQuery = expensesQuery.Where(e => e.Amount >= exactMin.Value);
+            }
+
+            var exactMax = query.maxAmount ?? query.To;
+            if (exactMax.HasValue)
+            {
+                expensesQuery = expensesQuery.Where(e => e.Amount <= exactMax.Value);
+            }
+
+            // 5. Ordenamiento Dinámico (Sort)
+            expensesQuery = query.sort?.ToLower() switch
+            {
+                "amount_desc" => expensesQuery.OrderByDescending(e => e.Amount),
+                "amount" => expensesQuery.OrderBy(e => e.Amount),
+                "desc" => expensesQuery.OrderByDescending(e => e.Description), // Ejemplo por descripción
+                _ => expensesQuery.OrderByDescending(e => e.Id) // Orden por defecto (ej. ID o Fecha)
+            };
+
+            // 6. Validar valores de Paginación
+            int currentPage = query.page ?? 1;
+            int currentPageSize = query.pageSize ?? 10;
+
+            if (currentPage < 1) currentPage = 1;
+            if (currentPageSize < 1 || currentPageSize > 100) currentPageSize = 10;
+
+            // 7. Aplicar Paginación y Ejecutar Consulta en la Base de Datos
+            var expenses = await expensesQuery
+                .Skip((currentPage - 1) * currentPageSize)
+                .Take(currentPageSize)
+                .ToListAsync();
+
+            // 8. Mapear a DTO en memoria
             return expenses.Select(MapToDto);
         }
         private static ExpenseDto MapToDto(Expense expense) => new ExpenseDto

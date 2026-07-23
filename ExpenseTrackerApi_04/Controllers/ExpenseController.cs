@@ -41,9 +41,9 @@ namespace ExpenseTrackerApi_04.Controllers
             return NoContent();
         }
         [HttpGet]
-        public async Task<IActionResult> GetAll()
+        public async Task<IActionResult> GetAll([FromQuery] ExpenseQueryParameters query)
         {
-            var expenses = await _useCase.GetAll();
+            var expenses = await _useCase.GetAll(query);
             return Ok(expenses);
         }
     }
