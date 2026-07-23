@@ -91,10 +91,10 @@ namespace ExpenseTrackerApi_04.Application
             if (currentPageSize < 1 || currentPageSize > 100) currentPageSize = 10;
 
             // 7. Aplicar Paginación y Ejecutar Consulta en la Base de Datos
-            var expenses = await expensesQuery
-                .Skip((currentPage - 1) * currentPageSize)
-                .Take(currentPageSize)
-                .ToListAsync();
+            var expenses = await expensesQuery 
+                .Skip((currentPage - 1) * currentPageSize) // cantidad de registros a saltar
+                .Take(currentPageSize) // numero de reguistros a tomar
+                .ToListAsync(); // es aqui donde finalmente la consulta se ejecuta
 
             // 8. Mapear a DTO en memoria
             return expenses.Select(MapToDto);
