@@ -113,6 +113,28 @@ namespace ExpenseTrackerApi_04.Application
             // 9. Mapear a DTO en memoria
             return expenses.Select(MapToDto);
         }
+        public async Task<IEnumerable<ExpensesByCategory>> GetExpensesByCategory()
+        {
+            var result = await _context.Expenses
+            .AsNoTracking()
+            .Include(e => e.Category)
+            .GroupBy(e => new
+            {
+                e.CategoryId,
+                CategoryName = e.Category!.Name
+            })
+            .Select(g => new ExpensesByCategory
+            {
+                CategoryId = g.Key.CategoryId,
+                CategoryName = g.Key.CategoryName,
+                TotalExpenses = g.Count(),
+                TotalAmount = g.Sum(e => e.Amount)
+            })
+            .OrderByDescending(x => x.TotalAmount)
+            .ToListAsync();
+
+            return result;
+        }
         private static ExpenseDto MapToDto(Expense expense) => new ExpenseDto
         {
             Id = expense.Id,

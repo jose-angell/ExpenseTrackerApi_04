@@ -46,5 +46,11 @@ namespace ExpenseTrackerApi_04.Controllers
             var expenses = await _useCase.GetAll(query);
             return Ok(expenses);
         }
+        [HttpGet("by-category")]
+        public async Task<IActionResult> GetByCategory()
+        {
+            var result = await _useCase.GetExpensesByCategory();
+            return Ok(result);
+        }
     }
 }
