@@ -117,7 +117,7 @@ namespace ExpenseTrackerApi_04.Application
         {
             var result = await _context.Expenses
             .AsNoTracking()
-            .Include(e => e.Category)
+            //.Include(e => e.Category) al no usar este include EF interpreta el group como un join
             .GroupBy(e => new
             {
                 e.CategoryId,
@@ -134,6 +134,26 @@ namespace ExpenseTrackerApi_04.Application
             .ToListAsync();
 
             return result;
+        }
+        public async Task<ExpenseSummary> GetSummary()
+        {
+            var summary = await _context.Expenses
+                .AsNoTracking()
+                .GroupBy(e => 1) //Agrupa todos los registros dentro de un solo grupo
+                .Select(g => new ExpenseSummary
+                {
+                    TotalExpenses = g.Count(),
+                    TotalAmount = g.Sum(e => e.Amount),
+                    AverageExpense = g.Average(e => e.Amount)
+                })
+                .FirstOrDefaultAsync();
+
+            return summary ?? new ExpenseSummary
+            {
+                TotalExpenses = 0,
+                TotalAmount = 0,
+                AverageExpense = 0
+            };
         }
         private static ExpenseDto MapToDto(Expense expense) => new ExpenseDto
         {
