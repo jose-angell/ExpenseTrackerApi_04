@@ -19,7 +19,7 @@ namespace ExpenseTrackerApi_04.Domain
         }
         public Expense(string description, decimal amount, DateTimeOffset expenseDate, Guid categoryId)
         {
-            validate(description, amount, expenseDate, categoryId);
+            Validate(description, amount, expenseDate, categoryId);
             Id = Guid.NewGuid();
             Description = description;
             Amount = amount;
@@ -28,13 +28,13 @@ namespace ExpenseTrackerApi_04.Domain
         }
         public void Update(string description, decimal amount, DateTimeOffset expenseDate, Guid categoryId)
         {
-            validate(description, amount, expenseDate, categoryId);
+            Validate(description, amount, expenseDate, categoryId);
             Description = description;
             Amount = amount;
             ExpenseDate = expenseDate;
             CategoryId = categoryId;
         }
-        private void validate(string description, decimal amount, DateTimeOffset expenseDate, Guid categoryId)
+        private void Validate(string description, decimal amount, DateTimeOffset expenseDate, Guid categoryId)
         {
             if (string.IsNullOrWhiteSpace(description))
             {

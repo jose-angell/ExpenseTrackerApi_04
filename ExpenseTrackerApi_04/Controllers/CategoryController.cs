@@ -16,7 +16,7 @@ namespace ExpenseTrackerApi_04.Controllers
         [HttpGet("{id:guid}")]
         public async Task<IActionResult> GetById([FromRoute] Guid id)
         {
-            if (id == Guid.Empty) return BadRequest("Id invalido");
+            if (id == Guid.Empty) return BadRequest("El id es inválido.");
             var category = await _useCase.GetById(id);
             return Ok(category);
         }
@@ -29,14 +29,14 @@ namespace ExpenseTrackerApi_04.Controllers
         [HttpPut("{id:guid}")]
         public async Task<IActionResult> Update([FromRoute] Guid id, [FromBody] UpdateCategory request)
         {
-            if (id == Guid.Empty) return BadRequest("Id invalido");
+            if (id == Guid.Empty) return BadRequest("El id es inválido.");
             await _useCase.Update(id, request);
             return NoContent();
         }
         [HttpDelete("{id:guid}")]
         public async Task<IActionResult> Delete([FromRoute] Guid id)
         {
-            if (id == Guid.Empty) return BadRequest("Id invalido");
+            if (id == Guid.Empty) return BadRequest("El id es inválido.");
             await _useCase.Delete(id);
             return NoContent();
         }

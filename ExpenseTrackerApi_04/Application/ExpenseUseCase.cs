@@ -17,6 +17,8 @@ namespace ExpenseTrackerApi_04.Application
         public async Task<ExpenseDto> Create(CreateExpense request)
         {
             var expense = new Expense(request.Description, request.Amount, request.ExpenseDate, request.CategoryId);
+            var existCategory = await _context.Categories.AnyAsync(c => c.Id == request.CategoryId);
+            if (!existCategory) throw new ConflictException("La categoria no existe en el sistema");
             await _context.Expenses.AddAsync(expense);
             await _context.SaveChangesAsync();
             return MapToDto(expense);
@@ -26,6 +28,8 @@ namespace ExpenseTrackerApi_04.Application
             var expense  = await _context.Expenses.FindAsync(id);
             if (expense == null) throw new NotFoundException("Gasto no encontrado");
             expense.Update(request.Description,request.Amount,request.ExpenseDate,request.CategoryId);
+            var existCategory = await _context.Categories.AnyAsync(c => c.Id == request.CategoryId);
+            if (!existCategory) throw new NotFoundException("La categoria no existe en el sistema");
             await _context.SaveChangesAsync();
         }
         public async Task Delete(Guid id)
@@ -61,42 +65,52 @@ namespace ExpenseTrackerApi_04.Application
                 expensesQuery = expensesQuery.Where(e => e.CategoryId == query.CategoryId.Value);
             }
 
-            // 4. Filtro por Rango de Montos (minAmount y maxAmount / From y To)
-            var exactMin = query.minAmount ?? query.From;
+            // 4. Filtro por Rango de Montos (minAmount y maxAmount )
+            var exactMin = query.MinAmount;
             if (exactMin.HasValue)
             {
                 expensesQuery = expensesQuery.Where(e => e.Amount >= exactMin.Value);
             }
 
-            var exactMax = query.maxAmount ?? query.To;
+            var exactMax = query.MaxAmount;
             if (exactMax.HasValue)
             {
                 expensesQuery = expensesQuery.Where(e => e.Amount <= exactMax.Value);
             }
 
-            // 5. Ordenamiento Dinámico (Sort)
-            expensesQuery = query.sort?.ToLower() switch
+            // 6. Filtro por rango de fechas
+            if (query.FromDate.HasValue)
+            {
+                expensesQuery = expensesQuery.Where(e => e.ExpenseDate >= query.FromDate);
+            }
+            if (query.ToDate.HasValue)
+            {
+                expensesQuery = expensesQuery.Where(e => e.ExpenseDate <= query.ToDate);
+            }
+
+            // 6. Ordenamiento Dinámico (Sort)
+            expensesQuery = query.Sort?.ToLower() switch
             {
                 "amount_desc" => expensesQuery.OrderByDescending(e => e.Amount),
                 "amount" => expensesQuery.OrderBy(e => e.Amount),
                 "desc" => expensesQuery.OrderByDescending(e => e.Description), // Ejemplo por descripción
-                _ => expensesQuery.OrderByDescending(e => e.Id) // Orden por defecto (ej. ID o Fecha)
+                _ => expensesQuery.OrderByDescending(e => e.ExpenseDate) // Orden por defecto (ej. ID o Fecha)
             };
 
-            // 6. Validar valores de Paginación
-            int currentPage = query.page ?? 1;
-            int currentPageSize = query.pageSize ?? 10;
+            // 7. Validar valores de Paginación
+            int currentPage = query.Page ?? 1;
+            int currentPageSize = query.PageSize ?? 10;
 
             if (currentPage < 1) currentPage = 1;
             if (currentPageSize < 1 || currentPageSize > 100) currentPageSize = 10;
 
-            // 7. Aplicar Paginación y Ejecutar Consulta en la Base de Datos
+            // 8. Aplicar Paginación y Ejecutar Consulta en la Base de Datos
             var expenses = await expensesQuery 
                 .Skip((currentPage - 1) * currentPageSize) // cantidad de registros a saltar
                 .Take(currentPageSize) // numero de reguistros a tomar
                 .ToListAsync(); // es aqui donde finalmente la consulta se ejecuta
 
-            // 8. Mapear a DTO en memoria
+            // 9. Mapear a DTO en memoria
             return expenses.Select(MapToDto);
         }
         private static ExpenseDto MapToDto(Expense expense) => new ExpenseDto

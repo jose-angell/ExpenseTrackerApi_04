@@ -13,10 +13,10 @@ namespace ExpenseTrackerApi_04.Controllers
         {
             _useCase = useCase;
         }
-        [HttpGet("{id:guid}")]
+        [HttpGet("{id:guid}")]// usar guid en la ruta hace que asp.net valide el formato correcto del dato
         public async Task<IActionResult> GetById([FromRoute] Guid id)
         {
-            if (id == Guid.Empty) return BadRequest("El id es invalido");
+            if (id == Guid.Empty) return BadRequest("El id es inválido.");
             var expense = await _useCase.GetById(id);
             return Ok(expense);
         }
@@ -29,14 +29,14 @@ namespace ExpenseTrackerApi_04.Controllers
         [HttpPut("{id:guid}")]
         public async Task<IActionResult> Update([FromRoute] Guid id, [FromBody] UpdateExpense request)
         {
-            if (id == Guid.Empty) return BadRequest("El id es invalido");
+            if (id == Guid.Empty) return BadRequest("El id es inválido.");
             await _useCase.Update(id, request);
             return NoContent();
         }
         [HttpDelete("{id:guid}")]
         public async Task<IActionResult> Delete([FromRoute] Guid id)
         {
-            if (id == Guid.Empty) return BadRequest("El id es invalido");
+            if (id == Guid.Empty) return BadRequest("El id es inválido.");
             await _useCase.Delete(id);
             return NoContent();
         }

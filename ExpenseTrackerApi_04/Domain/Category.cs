@@ -16,7 +16,7 @@ namespace ExpenseTrackerApi_04.Domain
         }
         public Category(string name, string description)
         {
-            validate(name, description);
+            Validate(name, description);
 
             Id = Guid.NewGuid();
             Name = name;
@@ -24,11 +24,11 @@ namespace ExpenseTrackerApi_04.Domain
         }
         public void Update(string name, string description)
         {
-            validate(name, description);
+            Validate(name, description);
             Name = name;
             Description = description;
         }
-        private void validate(string name, string description)
+        private void Validate(string name, string description)
         {
             if (string.IsNullOrWhiteSpace(name))
             {

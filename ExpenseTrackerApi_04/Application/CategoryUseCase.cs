@@ -19,12 +19,15 @@ namespace ExpenseTrackerApi_04.Application
             if (existCategory) throw new ConflictException("Ya existe una categoria con el mismo nombre");
             var newCategory = new Category(request.Name, request.Description);
             await _context.Categories.AddAsync(newCategory);
+            await _context.SaveChangesAsync();
             return MapToDto(newCategory);
         }
         public async Task Update(Guid id, UpdateCategory request)
         {
             var category = await _context.Categories.FindAsync(id);
             if (category == null) throw new NotFoundException("No existe la categoria");
+            var existCategory = await _context.Categories.AnyAsync(c => c.Name == request.Name && c.Id != id);
+            if (existCategory) throw new ConflictException("Ya existe una categoria con el mismo nombre");
             category.Update(request.Name, request.Description);
             await _context.SaveChangesAsync();
         }

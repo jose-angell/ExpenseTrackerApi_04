@@ -15,3 +15,5 @@ namespace ExpenseTrackerApi_04.Dtos.Expense
         public Guid CategoryId { get; set; }
     }
 }
+// al usar ? para que un dato sea null permite a Required detectar un ausente, ya que en casos commo 
+// decimal o int, o datetime, tienen valores por defeto y siempre saltarian esta validacion como correcta
